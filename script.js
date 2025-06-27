@@ -6,7 +6,6 @@ const dom = {
     startCameraBtn: document.getElementById('start-camera-btn'),
     cameraStream: document.getElementById('camera-stream'),
     takePictureBtn: document.getElementById('take-picture-btn'),
-    imageUploader: document.getElementById('image-uploader'),
     gameMessage: document.getElementById('game-message'),
     playerGuessingControls: document.getElementById('player-guessing-controls'),
     playerGuessInput: document.getElementById('player-guess-input'),
@@ -249,7 +248,6 @@ function setupEventListeners() {
     dom.startCameraBtn.addEventListener('click', startCamera);
     dom.takePictureBtn.addEventListener('click', takePicture);
 
-    dom.imageUploader.addEventListener('change', handleImageUpload);
     dom.submitGuessBtn.addEventListener('click', handlePlayerGuess);
     dom.playerGuessInput.addEventListener('keyup', (e) => e.key === 'Enter' && handlePlayerGuess());
 
