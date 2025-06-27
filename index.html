@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Spy with an AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <h1>I Spy with an AI</h1>
+        
+        <div id="scoreboard">
+            <p>Scores</p>
+            <span>You: <span id="player-score">0</span></span>
+            <span>AI: <span id="ai-score">0</span></span>
+        </div>
+
+        <div id="image-display-area">
+            <img id="game-image" src="" alt="Game scene will be displayed here" style="display:none;">
+            <div id="image-placeholder">
+                <p>Upload an image to start the game.</p>
+                <input type="file" id="image-uploader" accept="image/*">
+                <label for="image-uploader" class="button">Upload Image</label>
+            </div>
+        </div>
+
+        <div id="message-area">
+            <p id="game-message">Welcome! It's the AI's turn first. Upload a picture of the room.</p>
+        </div>
+
+        <div id="controls-area">
+            <div id="player-guessing-controls" class="control-group" style="display:none;">
+                <input type="text" id="player-guess-input" placeholder="Type your guess...">
+                <button id="submit-guess-btn" class="button">Guess</button>
+                <button id="mic-btn" class="button icon-button">
+                    <img src="microphone.png" alt="Use Microphone">
+                </button>
+            </div>
+            <div id="ai-guessing-controls" class="control-group" style="display:none;">
+                <p>Is the AI's guess correct?</p>
+                <button id="ai-guess-correct-btn" class="button">Yes, Correct!</button>
+                <button id="ai-guess-wrong-btn" class="button">No, Wrong.</button>
+            </div>
+             <div id="new-round-controls" class="control-group" style="display:none;">
+                <button id="new-round-btn" class="button">Start Next Round</button>
+            </div>
+        </div>
+        
+        <div id="loading-spinner" style="display:none;"></div>
+    </div>
+
+    <script src="script.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
+
