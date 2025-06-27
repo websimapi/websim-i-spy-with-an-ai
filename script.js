@@ -3,6 +3,9 @@ const dom = {
     aiScore: document.getElementById('ai-score'),
     gameImage: document.getElementById('game-image'),
     imagePlaceholder: document.getElementById('image-placeholder'),
+    startCameraBtn: document.getElementById('start-camera-btn'),
+    cameraStream: document.getElementById('camera-stream'),
+    takePictureBtn: document.getElementById('take-picture-btn'),
     imageUploader: document.getElementById('image-uploader'),
     gameMessage: document.getElementById('game-message'),
     playerGuessingControls: document.getElementById('player-guessing-controls'),
@@ -29,6 +32,7 @@ let state = {
     spiedClue: null,
     imageData: null,
     aiGuessedItems: [],
+    stream: null, // To hold the camera stream
 };
 
 function setState(newState) {
@@ -40,9 +44,11 @@ function renderUI() {
     dom.playerScore.textContent = state.scores.player;
     dom.aiScore.textContent = state.scores.ai;
 
-    dom.imagePlaceholder.style.display = state.imageData ? 'none' : 'flex';
+    dom.imagePlaceholder.style.display = state.imageData || state.stream ? 'none' : 'flex';
     dom.gameImage.style.display = state.imageData ? 'block' : 'none';
     dom.gameImage.src = state.imageData || '';
+    dom.cameraStream.style.display = state.stream && !state.imageData ? 'block' : 'none';
+    dom.takePictureBtn.style.display = state.stream && !state.imageData ? 'block' : 'none';
 
     dom.playerGuessingControls.style.display = state.phase === 'guessing' && state.turn === 'ai' ? 'flex' : 'none';
     dom.aiGuessingControls.style.display = state.phase === 'guessing' && state.turn === 'player' ? 'flex' : 'none';
@@ -53,6 +59,41 @@ function renderUI() {
     if (state.phase === 'spying') {
         dom.playerGuessingControls.style.display = 'none';
         dom.aiGuessingControls.style.display = 'none';
+    }
+}
+
+async function startCamera() {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            dom.cameraStream.srcObject = stream;
+            setState({ stream: stream });
+        } catch (err) {
+            console.error("Error accessing camera: ", err);
+            dom.gameMessage.textContent = "Could not access the camera. Please check permissions and try again.";
+        }
+    } else {
+        dom.gameMessage.textContent = "Your browser does not support camera access.";
+    }
+}
+
+function takePicture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = dom.cameraStream.videoWidth;
+    canvas.height = dom.cameraStream.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(dom.cameraStream, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg');
+
+    // Stop the camera stream
+    state.stream.getTracks().forEach(track => track.stop());
+
+    setState({ imageData: dataUrl, stream: null });
+
+    if (state.turn === 'ai') {
+        startAiTurn();
+    } else {
+        startPlayerTurn();
     }
 }
 
@@ -93,7 +134,7 @@ async function startAiTurn() {
     } catch (error) {
         console.error("AI spying failed:", error);
         dom.gameMessage.textContent = "The AI had trouble picking an object. Please try another image.";
-        setState({ phase: 'setup' });
+        setState({ phase: 'setup', imageData: null });
     }
 }
 
@@ -191,20 +232,23 @@ function handleAiGuessResponse(isCorrect) {
 
 function startNewRound() {
     const nextTurn = state.turn === 'ai' ? 'player' : 'ai';
-    dom.imageUploader.value = '';
     setState({
         turn: nextTurn,
         phase: 'setup',
         imageData: null,
+        stream: null,
     });
     if (nextTurn === 'ai') {
-        dom.gameMessage.textContent = "New round! It's the AI's turn. Upload an image.";
+        dom.gameMessage.textContent = "New round! It's the AI's turn. Use your camera to show me the room.";
     } else {
-        dom.gameMessage.textContent = "New round! It's your turn. Upload an image and think of an object.";
+        dom.gameMessage.textContent = "New round! It's your turn. Use your camera and think of an object.";
     }
 }
 
 function setupEventListeners() {
+    dom.startCameraBtn.addEventListener('click', startCamera);
+    dom.takePictureBtn.addEventListener('click', takePicture);
+
     dom.imageUploader.addEventListener('change', handleImageUpload);
     dom.submitGuessBtn.addEventListener('click', handlePlayerGuess);
     dom.playerGuessInput.addEventListener('keyup', (e) => e.key === 'Enter' && handlePlayerGuess());
@@ -241,8 +285,6 @@ function setupEventListeners() {
     }
 }
 
-
 // Initial setup
 renderUI();
 setupEventListeners();
-

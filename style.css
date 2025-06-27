@@ -58,7 +58,7 @@ h1 {
     position: relative;
 }
 
-#game-image {
+#game-image, #camera-stream {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -71,6 +71,14 @@ h1 {
     align-items: center;
     justify-content: center;
     color: #606770;
+}
+
+#take-picture-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
 }
 
 #image-uploader {
@@ -173,4 +181,3 @@ h1 {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-

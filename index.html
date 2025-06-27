@@ -18,15 +18,16 @@
 
         <div id="image-display-area">
             <img id="game-image" src="" alt="Game scene will be displayed here" style="display:none;">
+            <video id="camera-stream" autoplay playsinline style="display: none;"></video>
             <div id="image-placeholder">
-                <p>Upload an image to start the game.</p>
-                <input type="file" id="image-uploader" accept="image/*">
-                <label for="image-uploader" class="button">Upload Image</label>
+                <p>Use your camera to start the game.</p>
+                <button id="start-camera-btn" class="button">Use Camera</button>
             </div>
+            <button id="take-picture-btn" class="button" style="display: none;">Take Picture</button>
         </div>
 
         <div id="message-area">
-            <p id="game-message">Welcome! It's the AI's turn first. Upload a picture of the room.</p>
+            <p id="game-message">Welcome! It's the AI's turn first. Use your camera to show me the room.</p>
         </div>
 
         <div id="controls-area">
@@ -54,4 +55,3 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
-
