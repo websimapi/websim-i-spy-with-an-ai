@@ -7,6 +7,9 @@ const dom = {
     cameraStream: document.getElementById('camera-stream'),
     takePictureBtn: document.getElementById('take-picture-btn'),
     gameMessage: document.getElementById('game-message'),
+    playerHintControls: document.getElementById('player-hint-controls'),
+    playerHintInput: document.getElementById('player-hint-input'),
+    submitHintBtn: document.getElementById('submit-hint-btn'),
     playerGuessingControls: document.getElementById('player-guessing-controls'),
     playerGuessInput: document.getElementById('player-guess-input'),
     submitGuessBtn: document.getElementById('submit-guess-btn'),
@@ -29,6 +32,7 @@ let state = {
     guessesLeft: 5,
     spiedObject: null,
     spiedClue: null,
+    playerHint: null,
     imageData: null,
     aiGuessedItems: [],
     stream: null, // To hold the camera stream
@@ -49,13 +53,15 @@ function renderUI() {
     dom.cameraStream.style.display = state.stream && !state.imageData ? 'block' : 'none';
     dom.takePictureBtn.style.display = state.stream && !state.imageData ? 'block' : 'none';
 
+    dom.playerHintControls.style.display = state.phase === 'spying' && state.turn === 'player' ? 'flex' : 'none';
     dom.playerGuessingControls.style.display = state.phase === 'guessing' && state.turn === 'ai' ? 'flex' : 'none';
     dom.aiGuessingControls.style.display = state.phase === 'guessing' && state.turn === 'player' ? 'flex' : 'none';
     dom.newRoundControls.style.display = state.phase === 'reveal' ? 'flex' : 'none';
 
-    dom.loadingSpinner.style.display = state.phase === 'spying' ? 'block' : 'none';
+    dom.loadingSpinner.style.display = state.phase === 'spying' && state.turn === 'ai' ? 'block' : 'none';
 
     if (state.phase === 'spying') {
+        if (state.turn === 'ai') dom.loadingSpinner.style.display = 'block';
         dom.playerGuessingControls.style.display = 'none';
         dom.aiGuessingControls.style.display = 'none';
     }
@@ -179,12 +185,6 @@ async function handlePlayerGuess() {
     dom.micBtn.disabled = false;
 }
 
-function startPlayerTurn() {
-    setState({ phase: 'spying', guessesLeft: 5, aiGuessedItems: [] });
-    dom.gameMessage.textContent = "Your turn! Think of an object in the image. The AI will start guessing.";
-    setTimeout(handleAIGuess, 2000); // Give player time to think
-}
-
 async function handleAIGuess() {
     setState({ phase: 'guessing' });
     dom.gameMessage.textContent = "AI is thinking of a guess...";
@@ -193,7 +193,7 @@ async function handleAIGuess() {
         const completion = await websim.chat.completions.create({
             messages: [{
                 role: 'system',
-                content: `You are playing "I Spy". Look at the image and guess one common object. You have been told that these previous guesses were wrong: ${JSON.stringify(state.aiGuessedItems)}. Do not guess them again. Respond with JSON: {"guess": "object name"}.`
+                content: `You are playing "I Spy". The user has spied an object that has the following hint: "${state.playerHint}". Look at the image and guess one common object that matches the hint. You have been told that these previous guesses were wrong: ${JSON.stringify(state.aiGuessedItems)}. Do not guess them again. Respond with JSON: {"guess": "object name"}.`
             }, {
                 role: 'user',
                 content: [{ type: 'image_url', image_url: { url: state.imageData } }]
@@ -236,6 +236,7 @@ function startNewRound() {
         phase: 'setup',
         imageData: null,
         stream: null,
+        playerHint: null,
     });
     if (nextTurn === 'ai') {
         dom.gameMessage.textContent = "New round! It's the AI's turn. Use your camera to show me the room.";
@@ -244,9 +245,31 @@ function startNewRound() {
     }
 }
 
+function startPlayerTurn() {
+    setState({ phase: 'spying', guessesLeft: 5, aiGuessedItems: [], playerHint: null });
+    dom.gameMessage.textContent = "Your turn! Think of an object in the image, then give the AI a hint (e.g., its color).";
+}
+
+async function handleHintSubmit() {
+    const hint = dom.playerHintInput.value.trim();
+    if (!hint) {
+        dom.gameMessage.textContent = "Please provide a hint for the AI.";
+        return;
+    }
+
+    setState({ playerHint: hint });
+    dom.playerHintInput.value = '';
+    
+    // Now that we have the hint, let the AI guess.
+    handleAIGuess();
+}
+
 function setupEventListeners() {
     dom.startCameraBtn.addEventListener('click', startCamera);
     dom.takePictureBtn.addEventListener('click', takePicture);
+
+    dom.submitHintBtn.addEventListener('click', handleHintSubmit);
+    dom.playerHintInput.addEventListener('keyup', (e) => e.key === 'Enter' && handleHintSubmit());
 
     dom.submitGuessBtn.addEventListener('click', handlePlayerGuess);
     dom.playerGuessInput.addEventListener('keyup', (e) => e.key === 'Enter' && handlePlayerGuess());
